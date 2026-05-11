@@ -1,1 +1,1 @@
-# VastTHT
+# Vast_Lunar_Mining_Simulation
