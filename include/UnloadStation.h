@@ -13,7 +13,7 @@ class UnloadStation {
         // Core behavior
         void addTruck(int truckId, int currentTime);
         void startUnload(int truckId, int currentTime);
-        void finishUnload(int currentTime);
+        void finishUnload();
 
         // Metrics
         int getTotalTrucksServed() const;
@@ -28,6 +28,5 @@ class UnloadStation {
         int currentTruck_;
         int totalTrucksServed_;
         int totalBusyTime_;
-        bool busy_;
         std::queue<int> queue_;
 };
