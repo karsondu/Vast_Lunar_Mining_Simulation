@@ -1,7 +1,7 @@
 class Truck {
     public:
         Truck(int id); //constructor
-        int getId();
+        int getId() const;
 
         //Time changes
         void addMiningTime(int minutes); //random between 1 to 5 hours
