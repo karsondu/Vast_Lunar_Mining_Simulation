@@ -2,7 +2,6 @@ enum class EventType { //event types for tracking, only adding time when done
     MiningComplete,
     ArriveAtStation,
     UnloadComplete,
-    ReturnToMine
 };
 
 class Event {
@@ -13,12 +12,10 @@ class Event {
             int stationId = -1); //default value of -1 for station since not all events require a station
 
         int getTime() const; //We can use this to update our simulation time
-
         EventType getType() const;
-
         int getTruckId() const; 
-
         int getStationId() const;
+        bool operator>(const Event& other) const;
 
     private:
         int time_;
