@@ -6,7 +6,7 @@ public:
 
     int getId() const;
 
-    // Query
+    // Query Status
     bool isBusy(int currentTime) const;
     int getQueueLength() const;
 
@@ -19,7 +19,7 @@ public:
     int getTotalTrucksServed() const;
     int getTotalBusyTime() const;
 
-    // Decision helper
+    // Used to help decide which stations trucks should go to
     int estimateWaitTime(int currentTime) const;
 
 private:
