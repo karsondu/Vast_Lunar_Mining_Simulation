@@ -1,5 +1,6 @@
 #include "Event.h"
 
+//Constructor creates Event object -> (time of Event,Event Type, Associated TruckId, Associated StationId)
 Event::Event(int time,
              EventType type,
              int truckId,
@@ -10,6 +11,7 @@ Event::Event(int time,
       stationId_(stationId) {}
 
 
+//Getters
 int Event::getTime() const {
     return time_;
 }
