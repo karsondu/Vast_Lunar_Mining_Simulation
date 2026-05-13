@@ -3,7 +3,7 @@
 Event::Event(int time,
              EventType type,
              int truckId,
-             int stationId=-1)
+             int stationId)
     : time_(time),
       type_(type),
       truckId_(truckId),
