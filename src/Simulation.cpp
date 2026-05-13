@@ -2,13 +2,14 @@
 
 #include <iostream>
 #include <random>
+#include <ctime>
 
 // Constructor
-Simulation::Simulation(int numTrucks, int numStations)
+Simulation::Simulation(int numTrucks, int numStations, unsigned int seed)
     : currentTime_(0),
     simulationEndTime_(72 * 60) {
         
-        srand(time(nullptr));
+        srand(seed);
         for (int i = 0; i < numTrucks; i++) {
             trucks_.push_back(Truck(i));
         }

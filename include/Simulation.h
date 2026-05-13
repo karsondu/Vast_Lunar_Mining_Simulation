@@ -1,13 +1,15 @@
 #include <vector>
 #include <queue>
+#include <ctime>
 
 #include "Truck.h"
 #include "UnloadStation.h"
 #include "Event.h"
 
+
 class Simulation {
     public:
-        Simulation(int n, int m);
+        Simulation(int n, int m, unsigned int seed=time(0));
         void run();
         void printStatistics() const;
     
