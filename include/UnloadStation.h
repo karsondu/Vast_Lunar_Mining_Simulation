@@ -12,6 +12,7 @@ class UnloadStation {
 
         // Core behavior
         void addTruck(int truckId, int currentTime);
+        int popNextTruck();
         void startUnload(int truckId, int currentTime);
         void finishUnload();
 

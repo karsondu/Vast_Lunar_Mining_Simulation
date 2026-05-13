@@ -34,6 +34,12 @@ void UnloadStation::addTruck(int truckId, int currentTime) {
     }
 }
 
+int UnloadStation::popNextTruck() {
+    int nextTruck = queue_.front();
+    queue_.pop();
+    return nextTruck;
+}
+
 void UnloadStation::startUnload(int truckId, int currentTime) {
     currentTruck_ = truckId;
     busyUntil_ = currentTime + 5;
