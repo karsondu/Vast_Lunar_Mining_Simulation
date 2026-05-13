@@ -12,6 +12,10 @@ int main() {
     std::cin>>numTrucks;
     std::cout << "Enter Number of Stations(m): ";
     std::cin>>numStations;
+    if (numTrucks < 1 || numStations < 1) {
+        std::cout << "Must have at least 1 truck and at least 1 station";
+        return 0;
+    }
 
     std::cin.ignore(); // clear buffer
     std::cout << "Enter seed or press Enter for random: ";
