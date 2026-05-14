@@ -1,3 +1,4 @@
+#pragma once
 class Truck {
     public:
         //constructor that assigns an Id to a truck
