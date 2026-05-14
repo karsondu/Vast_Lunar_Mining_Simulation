@@ -28,7 +28,8 @@ int Event::getStationId() const {
     return stationId_;
 }
 
-// Comparison for priority queue
+// Comparison for our events priority queue, ensures that earlier events come first in our priority queue
+//Comparitor checks if time > other.time, if so it means that the current event object comes after the other event object
 bool Event::operator>(const Event& other) const {
     return time_ > other.time_;
 }
