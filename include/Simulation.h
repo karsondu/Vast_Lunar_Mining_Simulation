@@ -44,9 +44,11 @@ class Simulation {
         //Function for processing our event, it takes in an event object and based on the event types, the function takes care of the related
         //trucks, stations, and scheduling of future events appropriately.
         void processEvent(const Event& event);
+
         //Function that when given the currentTime, will loop through all the stations and see which one has the shortest wait time
         //This function returns the Id of the station with the smallest wait time.
         int chooseBestStation(int currentTime); 
+        
         //Generates a random time from 1 - 5 hours converted to minutes, so
         //60 - 300 minutes, is used specifically for mining time only.
         int generateMiningTime(); 
