@@ -1,4 +1,5 @@
 #include "Event.h"
+#include <stdexcept>
 
 //Constructor creates Event object -> (time of Event,Event Type, Associated TruckId, Associated StationId)
 Event::Event(int time,
@@ -8,7 +9,11 @@ Event::Event(int time,
     : time_(time),
       type_(type),
       truckId_(truckId),
-      stationId_(stationId) {}
+      stationId_(stationId) {
+        if (time < 0) {
+            throw std::invalid_argument("Event time cannot be negative");
+        }
+    }
 
 
 //Getters
