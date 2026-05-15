@@ -41,15 +41,15 @@ Each event contains:
 ### Simulation Engine
 Responsible for:
 - Initializing trucks and stations
-- Generating initial mining events
+- Generating and scheduling initial mining events
 - Processing events in chronological order
-- Managing global simulation time
+- Keeping track of the global simulation time to make sure it doesn't go over the simulation end time
 - Coordinating interactions between trucks and stations
 
 ---
 
 ### Truck
-Tracks per-truck performance metrics across the full simulation:
+Represents each truck and tracks per-truck performance metrics across the full simulation:
 - Total mining time
 - Total travel time
 - Total waiting time
@@ -59,9 +59,9 @@ Tracks per-truck performance metrics across the full simulation:
 ---
 
 ### Unload Station
-Represents shared unloading infrastructure with constrained capacity:
+Represents an Unloading Station with constrained capacity:
 - Processes one truck at a time
-- Maintains a FIFO queue for waiting trucks
+- Maintains a FIFO queue for waiting trucks when busy
 - Tracks utilization (busy time)
 - Tracks number of trucks served
 - Provides estimated wait time for load balancing
@@ -75,7 +75,7 @@ Represents a scheduled action in the system:
 - Associated truck ID
 - Optional station ID
 
-Events are processed using a min-heap priority queue to ensure chronological execution.
+Events are processed using a min-heap priority queue to ensure chronological processing.
 
 ---
 
@@ -86,7 +86,7 @@ When a truck arrives at a station, the simulation selects the station with the l
 - Remaining busy time
 - Queue length
 
-This approach balances load across stations and reduces overall waiting time.
+This approach balances the load across stations and reduces overall waiting time.
 
 ---
 
@@ -113,3 +113,16 @@ mkdir build
 cd build
 cmake ..
 make
+```
+
+Then to run the simulation:
+
+```bash
+./sim
+```
+
+And to run the test suite:
+
+```bash
+./sim_tests
+```
