@@ -38,7 +38,7 @@ void Simulation::run() {
         Event nextEvent = eventQueue_.top();
         eventQueue_.pop();
         currentTime_ = nextEvent.getTime();
-        if (currentTime_ > simulationEndTime_) {
+        if (currentTime_ >= simulationEndTime_) {
             break;
         }
         processEvent(nextEvent);
@@ -108,10 +108,11 @@ void Simulation::processEvent(const Event& event) {
         case EventType::UnloadComplete: {
             stations_[stationId].finishUnload();
             trucks_[truckId].addCycle();
-            if (stations_[stationId].getQueueLength() > 0) {
+            //If there is a truck in queue and we are able to complete unloading before the simulation ends, then we should queue up an unload complete event
+            if (stations_[stationId].getQueueLength() > 0 && eventTime + 5 <= simulationEndTime_) {
                 int nextTruck = stations_[stationId].popNextTruck();
                 stations_[stationId].startUnload(nextTruck, eventTime);
-                trucks_[nextTruck].addUnloadTime(std::min(5,simulationEndTime_ - eventTime));
+                trucks_[nextTruck].addUnloadTime(std::min(5, simulationEndTime_ - eventTime));
                 Event nextEvent = Event(eventTime + 5, EventType::UnloadComplete, nextTruck, stationId);
                 eventQueue_.push(nextEvent);
             }
@@ -172,20 +173,21 @@ void Simulation::printStatistics() const {
         totalWaitingMinutes += curTruck.getWaitTime();
         std::cout << "\n";
         std::cout << "Truck ID: " << curTruck.getId() << std::endl;
-        std::cout << "Utilization: " << (curTruck.getMiningTime() + curTruck.getUnloadTime()) / 60 << " Hours and " <<  (curTruck.getMiningTime() + curTruck.getUnloadTime()) % 60 << " Minutes" << std::endl;
-        std::cout << "Utilization Percentage: " << std::fixed << std::setprecision(2) << static_cast<double>(curTruck.getMiningTime() + curTruck.getUnloadTime()) / (72*60) * 100<< "%" << std::endl;
-        int total_times = (curTruck.getWaitTime() + curTruck.getMiningTime() + curTruck.getTravelTime() + curTruck.getUnloadTime()) / curTruck.getCycles();
-        std::cout << "Average Cycle Duration: " << total_times / 60 << " Hours and "<< total_times % 60 << " Minutes" << std::endl;
-        std::cout << "Average Wait Time per Cycle: " << (curTruck.getWaitTime()) / curTruck.getCycles() / 60 << " Hours and " <<(curTruck.getWaitTime()) / curTruck.getCycles() % 60 <<" Minutes"<< std::endl;
-        std::cout << "Waiting Percentage: " << (static_cast<double>(curTruck.getWaitTime()) / (72*60)) * 100<< "%" << std::endl;
-        std::cout<< "Total Wait Time: " << curTruck.getWaitTime() / 60 << " Hours and " << curTruck.getWaitTime() % 60 << " Minutes" << std::endl;
-        
-        /*
-        std::cout<< "Total Mining Time: " << curTruck.getMiningTime() << " Minutes" << std::endl;
-        std::cout<< "Total Travel Time: " << curTruck.getTravelTime() << " Minutes" << std::endl;
-        std::cout<< "Total Unload Time: " << curTruck.getUnloadTime() << " Minutes" << std::endl;
-        std::cout<< "Total Cycles Completed: " << curTruck.getCycles() << " Cycles" << std::endl;
-        */
+        std::cout << "Utilization: " << (curTruck.getMiningTime() + curTruck.getUnloadTime()) / 60 << " Hours and " << (curTruck.getMiningTime() + curTruck.getUnloadTime()) % 60 << " Minutes" << std::endl;
+        std::cout << "Utilization Percentage: " << std::fixed << std::setprecision(2) << static_cast<double>(curTruck.getMiningTime() + curTruck.getUnloadTime()) / (72*60) * 100 << "%" << std::endl;
+
+        if (curTruck.getCycles() > 0) {
+            int total_times = (curTruck.getWaitTime() + curTruck.getMiningTime() + curTruck.getTravelTime() + curTruck.getUnloadTime()) / curTruck.getCycles();
+            std::cout << "Average Cycle Duration: " << total_times / 60 << " Hours and " << total_times % 60 << " Minutes" << std::endl;
+            std::cout << "Average Wait Time per Cycle: " << curTruck.getWaitTime() / curTruck.getCycles() / 60 << " Hours and " << curTruck.getWaitTime() / curTruck.getCycles() % 60 << " Minutes" << std::endl;
+        } else {
+            std::cout << "Average Cycle Duration: N/A (no completed cycles)" << std::endl;
+            std::cout << "Average Wait Time per Cycle: N/A (no completed cycles)" << std::endl;
+        }
+
+        int totalTruckTime = curTruck.getWaitTime() + curTruck.getMiningTime() + curTruck.getTravelTime() + curTruck.getUnloadTime();
+        std::cout << "Waiting Percentage: " << (static_cast<double>(curTruck.getWaitTime()) / totalTruckTime) * 100 << "%" << std::endl;
+        std::cout << "Total Wait Time: " << curTruck.getWaitTime() / 60 << " Hours and " << curTruck.getWaitTime() % 60 << " Minutes" << std::endl;
     }
 
     
