@@ -11,9 +11,9 @@ void testTruckBasics() {
     Truck t(0);
 
     t.addMiningTime(120);
-    t.addTravelTime();
+    t.addTravelTime(30);
     t.addWaitTime(15);
-    t.addUnloadTime();
+    t.addUnloadTime(5);
     t.addCycle();
 
     assert(t.getId() == 0 && "Id Assignment Failed");
