@@ -7,11 +7,11 @@ class Truck {
         //random between 1 to 5 hours converted to minutes
         void addMiningTime(int minutes); 
 
-        //travel always takes 30 mins; += 30
-        void addTravelTime(); 
+        //travel takes 30 mins, or time difference between end of simulation and current time
+        void addTravelTime(int minutes); 
 
-        //unloading always takes 5 mins += 5
-        void addUnloadTime(); 
+        //unloading takes 5 mins, or time difference between end of simulation and current time
+        void addUnloadTime(int minutes); 
 
         //can depend on if stations are occupied
         void addWaitTime(int minutes); 

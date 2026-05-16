@@ -26,14 +26,14 @@ void Truck::addMiningTime(int minutes) {
     miningTime_ += minutes;
 }
 
-//Adding Travel Time of 30 minutes
-void Truck::addTravelTime() {
-    travelTime_ += travelTime;
+//Adding Travel Time of 30 minutes or time difference
+void Truck::addTravelTime(int minutes) {
+    travelTime_ += minutes;
 }
 
-//Adding Unloading Time of 5 minutes
-void Truck::addUnloadTime() {
-    unloadTime_ += unloadTime;
+//Adding Unloading Time of 5 minutes or time difference
+void Truck::addUnloadTime(int minutes) {
+    unloadTime_ += minutes;
 }
 
 //Adds time spent waiting for a UnloadStation to open up
