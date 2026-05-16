@@ -1,5 +1,5 @@
 #include "Simulation.h"
-
+#include <iomanip>
 #include <iostream>
 #include <random>
 #include <ctime>
@@ -74,7 +74,7 @@ void Simulation::processEvent(const Event& event) {
         //If ET is MiningComplete, we proceed to travel to an unload station which takes 30 minutes of travel time which we add to the related truck
         //We then create an ArriveAtStation Event that occurs 30 minutes from this event time and push the newly created event into our eventQueue
         case EventType::MiningComplete: {
-            trucks_[truckId].addTravelTime();
+            trucks_[truckId].addTravelTime(std::min(30,simulationEndTime_ - eventTime));
             Event nextEvent = Event(eventTime + 30, EventType::ArriveAtStation, truckId, -1);
             eventQueue_.push(nextEvent);
             break;
@@ -90,7 +90,8 @@ void Simulation::processEvent(const Event& event) {
             trucks_[truckId].addWaitTime(wait);
             if (!stations_[bestStation].isBusy(eventTime)) {
                 stations_[bestStation].startUnload(truckId, eventTime);
-                trucks_[truckId].addUnloadTime();
+                int unloadDuration = std::min(5, simulationEndTime_ - eventTime);
+                trucks_[truckId].addUnloadTime(unloadDuration);
                 Event nextEvent = Event(eventTime + 5, EventType::UnloadComplete, truckId, bestStation);
                 eventQueue_.push(nextEvent);
             } else {
@@ -101,7 +102,7 @@ void Simulation::processEvent(const Event& event) {
 
         //If ET is UnloadComplete, we can call the station's finishUnload function to update its total busy time and free it up for future trucks
         //We can also add 1 cycle to the truck's total cycle count since this is the last event stage of a cycle
-        //We can then check if the station's queue has any trucks, if it does, we grab the nextTruck from the station's queue and pop it from the queue
+        //We can then check if the station's queue has any trucks, while it does, we grab the nextTruck from the station's queue and pop it from the queue
         //We then start the unloading process for this nextTruck and add the unloading time to its total unload time, then we create and queue up another UnloadComplete event 5 minutes from now
         //This means that UnloadComplete events automatically schedule future UnloadComplete events for other trucks in the station's queue 
         case EventType::UnloadComplete: {
@@ -110,19 +111,23 @@ void Simulation::processEvent(const Event& event) {
             if (stations_[stationId].getQueueLength() > 0) {
                 int nextTruck = stations_[stationId].popNextTruck();
                 stations_[stationId].startUnload(nextTruck, eventTime);
-                trucks_[nextTruck].addUnloadTime();
+                trucks_[nextTruck].addUnloadTime(std::min(5,simulationEndTime_ - eventTime));
                 Event nextEvent = Event(eventTime + 5, EventType::UnloadComplete, nextTruck, stationId);
                 eventQueue_.push(nextEvent);
             }
             //Since our truck is going back to a mining site, we can add the 30 minutes of travel time to its total travel time
-            //To emulate arriving at a mining and actively mining, we generate a random mining time and add it to our truck's total mining time
-            //Then we create and schedule a future mining complete event that happens at eventTime + 30 + randomMining time 
+            //To emulate arriving at a mining and actively mining, we generate a random mining time and see if we even have time to return to a mining site before the simulation ends
+            //if we do, then our actual mining time is clamped between the random mining time we generated, and the difference between the time we get to the mine and the amount of time left before the simulation ends 
+            //Then we add the actual mining time to our truck's total,then we create and schedule a future mining complete event that happens at miningStartTime + the actualMining time which is when we finish mining. 
             //to emulate the time it takes from eventTime to travel to the mine and finish mining
-            trucks_[truckId].addTravelTime();
+            trucks_[truckId].addTravelTime(std::min(30,simulationEndTime_- eventTime));
             int randomMiningTime = generateMiningTime();
-            trucks_[truckId].addMiningTime(randomMiningTime);
-            Event nextEvent = Event(eventTime + 30 + randomMiningTime, EventType::MiningComplete, truckId, -1);
-            eventQueue_.push(nextEvent);
+            int miningStartTime = eventTime + 30;
+            if (miningStartTime + randomMiningTime <= simulationEndTime_) {
+                trucks_[truckId].addMiningTime(randomMiningTime);
+                Event nextEvent(miningStartTime + randomMiningTime,EventType::MiningComplete,truckId,-1);
+                eventQueue_.push(nextEvent);
+            }
             break;
         }
 
@@ -162,21 +167,41 @@ int Simulation::generateMiningTime() {
 // Final statistics
 //We are just printing our the internal statistics for each truck and station that has been collected throughout the simulation
 void Simulation::printStatistics() const {
-
+    int totalWaitingMinutes = 0;
     for (const Truck& curTruck: trucks_) {
-        std::cout<< "Truck ID: " << curTruck.getId() << std::endl;
+        totalWaitingMinutes += curTruck.getWaitTime();
+        std::cout << "\n";
+        std::cout << "Truck ID: " << curTruck.getId() << std::endl;
+        std::cout << "Utilization: " << (curTruck.getMiningTime() + curTruck.getUnloadTime()) / 60 << " Hours and " <<  (curTruck.getMiningTime() + curTruck.getUnloadTime()) % 60 << " Minutes" << std::endl;
+        std::cout << "Utilization Percentage: " << std::fixed << std::setprecision(2) << static_cast<double>(curTruck.getMiningTime() + curTruck.getUnloadTime()) / (72*60) * 100<< "%" << std::endl;
+        int total_times = (curTruck.getWaitTime() + curTruck.getMiningTime() + curTruck.getTravelTime() + curTruck.getUnloadTime()) / curTruck.getCycles();
+        std::cout << "Average Cycle Duration: " << total_times / 60 << " Hours and "<< total_times % 60 << " Minutes" << std::endl;
+        std::cout << "Average Wait Time per Cycle: " << (curTruck.getWaitTime()) / curTruck.getCycles() / 60 << " Hours and " <<(curTruck.getWaitTime()) / curTruck.getCycles() % 60 <<" Minutes"<< std::endl;
+        std::cout << "Waiting Percentage: " << (static_cast<double>(curTruck.getWaitTime()) / (72*60)) * 100<< "%" << std::endl;
+        std::cout<< "Total Wait Time: " << curTruck.getWaitTime() / 60 << " Hours and " << curTruck.getWaitTime() % 60 << " Minutes" << std::endl;
+        
+        /*
         std::cout<< "Total Mining Time: " << curTruck.getMiningTime() << " Minutes" << std::endl;
         std::cout<< "Total Travel Time: " << curTruck.getTravelTime() << " Minutes" << std::endl;
-        std::cout<< "Total Wait Time: " << curTruck.getWaitTime() << " Minutes" << std::endl;
         std::cout<< "Total Unload Time: " << curTruck.getUnloadTime() << " Minutes" << std::endl;
         std::cout<< "Total Cycles Completed: " << curTruck.getCycles() << " Cycles" << std::endl;
+        */
     }
 
     
     for (const UnloadStation& curStation: stations_) {
+        std::cout << "\n";
         std::cout<< "Station ID: " << curStation.getId() << std::endl;
+        std::cout<< "Station Utilization: " << (static_cast<double>(curStation.getTotalBusyTime()) / (72*60)) * 100<< "%" << std::endl;
+        std::cout<< "Throughput: " << static_cast<double>(curStation.getTotalTrucksServed()) / 72 << " Trucks Per Hour" << std::endl;
         std::cout<< "Total Trucks Served: " << curStation.getTotalTrucksServed() << " Trucks" << std::endl;
-        std::cout<< "Total Minutes Busy: " << curStation.getTotalBusyTime() << " Minutes" << std::endl;
+        //std::cout<< "Total Minutes Busy: " << curStation.getTotalBusyTime() << " Minutes" << std::endl;
+        
     }
+    std::cout << "\n";
+    double avgWait = static_cast<double>(totalWaitingMinutes) / trucks_.size();
+    int avg_hours = static_cast<int>(avgWait) / 60;
+    int avg_mins = static_cast<int>(avgWait) % 60;
+    std::cout << "Average Truck Wait Time: " << avg_hours <<" Hours and " << avg_mins << " Minutes" << std::endl;
     
 }
