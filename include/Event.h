@@ -1,10 +1,10 @@
 #pragma once
 //Represents the different types of events that can occur during the simulation, 
 //gets used during processing of an event object to determine processing behavior 
-enum class EventType { 
-    MiningComplete,
-    ArriveAtStation,
-    UnloadComplete,
+enum class EventType {
+    UnloadComplete = 0,
+    MiningComplete = 1,
+    ArriveAtStation = 2,
 };
 
 class Event {
